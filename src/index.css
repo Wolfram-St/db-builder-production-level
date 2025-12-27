@@ -1,0 +1,23 @@
+@import "tailwindcss";
+@import "./prism.css";
+:root {
+  color-scheme: dark; /* Forces browser UA styles (buttons, scrollbars) to dark mode */
+}
+
+/* src/index.css */
+
+@layer utilities {
+  .animate-liam-flow {
+    /* distinct dashes: 8px line, 8px gap */
+    stroke-dasharray: 8 8; 
+    animation: flow 1s linear infinite;
+    /* Ensure the stroke stays crisp */
+    shape-rendering: geometricPrecision; 
+  }
+}
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -16; /* Must be sum of dash+gap (8+8) */
+  }
+}

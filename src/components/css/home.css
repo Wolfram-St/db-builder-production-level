@@ -1,0 +1,80 @@
+/* 1. The Main Page Wrapper */
+.page-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background-color: #000; /* Fallback for black background */
+    overflow: hidden; /* Prevents scrollbars if Spline overflows */
+}
+
+/* 2. Layer: The Spline Background */
+.spline-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0; /* Sits behind everything */
+}
+
+/* 3. Layer: The Foreground Content */
+.content-layer {
+    position: relative;
+    z-index: 10; /* Sits ON TOP of Spline */
+    height: 100%;
+    width: 100%;
+    max-width: 1200px; /* Limits content width for large screens */
+    margin: 0 auto;    /* Centers the max-width container */
+    
+    /* Layout Logic: Puts text on the left, vertically centered */
+    display: flex;
+    align-items: center; /* Vertical Center */
+    padding-left: 5%;    /* Space from the left edge */
+}
+
+/* 4. Text Styling */
+.hero-text-container {
+    color: white;
+    font-family: 'Inter', sans-serif; /* Use your preferred font */
+    max-width: 500px; /* Prevents text from hitting the 3D object */
+}
+
+.hero-title {
+    font-size: 4rem; /* Big Headline */
+    font-weight: 400; /* Thin/Modern look */
+    margin: 0;
+    line-height: 1.1;
+    letter-spacing: -1px;
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7); /* Slightly dimmed text */
+    margin-top: 1rem;
+    margin-bottom: 2.5rem; /* Space between text and button */
+}
+
+/* 5. Button Positioning */
+.button-wrapper {
+    display: flex;
+    justify-content: flex-start;
+}
+
+/* OPTIONAL: Mobile Responsiveness */
+@media (max-width: 768px) {
+    .content-layer {
+        justify-content: center; /* Center horizontally on mobile */
+        padding-left: 0;
+        text-align: center;
+        align-items: flex-end; /* Move text to bottom on mobile? */
+        padding-bottom: 100px;
+    }
+    
+    .button-wrapper {
+        justify-content: center;
+    }
+
+    .hero-title {
+        font-size: 3rem;
+    }
+}
