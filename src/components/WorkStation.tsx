@@ -18,7 +18,9 @@ import {
   Sparkles,
   Wand2,
   Cloud,
-  Loader2
+  Loader2,
+  Bot,
+  MessageSquare
 } from "lucide-react";
 
 // Components
@@ -28,9 +30,12 @@ import SQLDrawer from "./SQLDrawer";
 import SnipOverlay from "./SnipOverlay";
 import GenerateModal from "./GenerateModel";
 import { NotFound } from "./NotFound"; // Import your 404 component
+import AIChatSidebar from "./AIChatSidebar";
+import ShadowWorkspace from "./ShadowWorkspace";
 
 // Store & Libs
 import { useDBStore } from "../store/dbStore";
+import { useAIChatStore } from "../store/aiChatStore";
 import { saveProject as saveLocal, importProject } from "../lib/projectIO";
 import { saveProjectToCloud, loadProjectFromCloud } from "../lib/cloudIO";
 import { getLayoutedElements } from '../utils/layout';
@@ -58,6 +63,9 @@ function WorkStation() {
   const undo = useDBStore((s) => s.undo);
   const redo = useDBStore((s) => s.redo);
   const setScale = useDBStore((s) => s.setScale);
+
+  // --- AI CHAT STATE ---
+  const { isChatOpen, isSplitView, toggleChat } = useAIChatStore();
 
   // --- LOCAL STATE ---
   const [snipOpen, setSnipOpen] = useState(false);
@@ -407,20 +415,54 @@ useEffect(() => {
   return (
     <div className="w-full h-screen overflow-hidden bg-[#09090b] text-zinc-100 font-sans selection:bg-violet-500/30 relative flex flex-col bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]">
 
-      <main
-        ref={mainRef}
-        className="absolute inset-0 z-0 overflow-hidden cursor-grab active:cursor-grabbing"
-        onPointerDown={handlePointerDown}
-        onDrop={(e) => {
-          e.preventDefault();
-          const file = e.dataTransfer.files[0];
-          if (file) handleSafeImport(file);
-        }}
-        onDragOver={(e) => e.preventDefault()}
-      >
-        <div className="absolute inset-0 pointer-events-none opacity-20 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px]"></div>
-        <Canvas />
-      </main>
+      {/* Main Workspace Container - Adjusted for split view */}
+      <div className={`absolute inset-0 ${isChatOpen ? 'right-96' : 'right-0'} transition-all duration-300`}>
+        {/* Split View Layout */}
+        {isSplitView ? (
+          <div className="w-full h-full grid grid-cols-2 gap-1">
+            {/* Main Workspace (Left) */}
+            <main
+              ref={mainRef}
+              className="relative overflow-hidden cursor-grab active:cursor-grabbing border-r border-white/10"
+              onPointerDown={handlePointerDown}
+              onDrop={(e) => {
+                e.preventDefault();
+                const file = e.dataTransfer.files[0];
+                if (file) handleSafeImport(file);
+              }}
+              onDragOver={(e) => e.preventDefault()}
+            >
+              <div className="absolute inset-0 pointer-events-none opacity-20 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px]"></div>
+              <Canvas />
+              {/* Label for main workspace */}
+              <div className="absolute top-4 left-4 px-3 py-1 bg-zinc-900/80 border border-white/10 rounded-lg text-xs font-semibold text-white backdrop-blur-sm">
+                Main Workspace
+              </div>
+            </main>
+
+            {/* Shadow Workspace (Right) */}
+            <div className="relative overflow-hidden">
+              <ShadowWorkspace />
+            </div>
+          </div>
+        ) : (
+          /* Normal Single Workspace View */
+          <main
+            ref={mainRef}
+            className="absolute inset-0 z-0 overflow-hidden cursor-grab active:cursor-grabbing"
+            onPointerDown={handlePointerDown}
+            onDrop={(e) => {
+              e.preventDefault();
+              const file = e.dataTransfer.files[0];
+              if (file) handleSafeImport(file);
+            }}
+            onDragOver={(e) => e.preventDefault()}
+          >
+            <div className="absolute inset-0 pointer-events-none opacity-20 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px]"></div>
+            <Canvas />
+          </main>
+        )}
+      </div>
 
       {/* Top Left: Menu (UPDATED WITH CLOUD LOGIC) */}
       <div className="absolute top-4 left-4 z-50 flex items-center gap-3 pointer-events-none">
@@ -453,7 +495,21 @@ useEffect(() => {
       </div>
 
       {/* Top Right: Inspector */}
-      <div className="absolute top-4 right-4 z-50 flex flex-col gap-3 items-end pointer-events-none">
+      <div className={`absolute top-4 z-50 flex flex-col gap-3 items-end pointer-events-none transition-all duration-300 ${isChatOpen ? 'right-[25rem]' : 'right-4'}`}>
+        {/* AI Chat Toggle Button */}
+        <button
+          onClick={toggleChat}
+          className={`pointer-events-auto flex items-center gap-2 px-4 py-2 backdrop-blur-md border rounded-xl shadow-xl transition-all ${
+            isChatOpen
+              ? 'bg-violet-600 border-violet-500 text-white'
+              : 'bg-zinc-900/80 border-white/10 text-zinc-300 hover:text-white hover:border-violet-500/50'
+          }`}
+          title="Toggle AI Assistant"
+        >
+          <Bot size={16} />
+          <span className="text-xs font-medium">AI Assistant</span>
+        </button>
+
         {selectedRelationId && selectedRelation && (
           <div className="pointer-events-auto w-64 bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-right-4 duration-200">
             <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between bg-white/5">
@@ -558,6 +614,10 @@ useEffect(() => {
       )}
 
       <SQLDrawer />
+      
+      {/* AI Chat Sidebar */}
+      <AIChatSidebar />
+      
       <Toaster position="top-center" theme="dark" richColors />
 
     </div>
