@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism-tomorrow.css';
 import 'prismjs/components/prism-sql';
@@ -6,8 +7,6 @@ import 'prismjs/components/prism-javascript';
 import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-json';
 import { Copy, Check } from 'lucide-react';
-import { useState } from 'react';
-import type { ReactElement } from 'react';
 
 export interface MessageProps {
   role: 'user' | 'assistant' | 'system';

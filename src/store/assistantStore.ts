@@ -34,7 +34,7 @@ export const useAssistantStore = create<AssistantState>((set) => ({
         ...state.messages,
         {
           ...message,
-          id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
           timestamp: new Date(),
         },
       ],
