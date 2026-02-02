@@ -28,9 +28,12 @@ import SQLDrawer from "./SQLDrawer";
 import SnipOverlay from "./SnipOverlay";
 import GenerateModal from "./GenerateModel";
 import { NotFound } from "./NotFound"; // Import your 404 component
+import AssistantPanel from "./assistant/AssistantPanel";
+import AssistantButton from "./assistant/AssistantButton";
 
 // Store & Libs
 import { useDBStore } from "../store/dbStore";
+import { useAssistantStore } from "../store/assistantStore";
 import { saveProject as saveLocal, importProject } from "../lib/projectIO";
 import { saveProjectToCloud, loadProjectFromCloud } from "../lib/cloudIO";
 import { getLayoutedElements } from '../utils/layout';
@@ -222,10 +225,24 @@ useEffect(() => {
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName)) return;
 
       const store = useDBStore.getState();
+      const assistantStore = useAssistantStore.getState();
+
+      // --- CTRL/CMD + K: TOGGLE AI ASSISTANT ---
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        assistantStore.toggleOpen();
+        return;
+      }
 
       // --- ESCAPE HANDLER ---
       if (e.key === "Escape") {
         e.preventDefault();
+        
+        // 0. If assistant is open, close it first
+        if (assistantStore.isOpen) {
+            assistantStore.setOpen(false);
+            return;
+        }
         
         // 1. If drawing a line, cancel it
         if (store.activeLink) {
@@ -558,6 +575,8 @@ useEffect(() => {
       )}
 
       <SQLDrawer />
+      <AssistantButton />
+      <AssistantPanel />
       <Toaster position="top-center" theme="dark" richColors />
 
     </div>
