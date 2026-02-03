@@ -2,6 +2,9 @@
 
 A modern, visual database schema designer with AI-powered assistance. Build and visualize your database schemas with an intuitive drag-and-drop interface.
 
+> 🚀 **Quick Start**: See [QUICKSTART.md](./QUICKSTART.md) for a 5-minute setup guide  
+> ✅ **Setup Help**: Use [SETUP_CHECKLIST.md](./SETUP_CHECKLIST.md) to verify your installation
+
 ## Features
 
 - 🎨 Visual database schema designer
