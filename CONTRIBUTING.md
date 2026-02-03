@@ -17,7 +17,11 @@ npm install
 # Copy environment template
 cp .env.example .env
 
-# Edit .env with your Supabase credentials (optional for local dev)
+# Edit .env with your configuration:
+# - PORT (server port, default: 3000)
+# - SHADOW_DB_URL (PostgreSQL database connection)
+# - HF_ACCESS_TOKEN (Hugging Face token for AI features)
+# - Optional: VITE_PROJECT_URL and VITE_ANON_KEY (Supabase for cloud features)
 
 # Start development server
 npm run dev
@@ -131,9 +135,20 @@ npm install -D package-name
 
 Required environment variables (in `.env`):
 ```
+# Backend Configuration
+PORT=3000
+SHADOW_DB_URL=postgresql://user:password@host:port/database?sslmode=require
+HF_ACCESS_TOKEN=your_hugging_face_token
+
+# Optional: Supabase for cloud features
 VITE_PROJECT_URL=your_supabase_url
 VITE_ANON_KEY=your_supabase_key
 ```
+
+**Getting the values:**
+- **SHADOW_DB_URL**: Free PostgreSQL at [neon.tech](https://neon.tech) or [supabase.com](https://supabase.com)
+- **HF_ACCESS_TOKEN**: Get from [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
+- **Supabase credentials**: Optional, only needed for cloud save and authentication
 
 ## Common Tasks
 

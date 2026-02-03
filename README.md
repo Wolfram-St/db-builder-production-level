@@ -46,7 +46,7 @@ This will install all required dependencies including React, Vite, Tailwind CSS,
 
 ### 3. Set Up Environment Variables
 
-The application uses Supabase for authentication and cloud storage. Create a `.env` file in the root directory:
+Create a `.env` file in the root directory:
 
 ```bash
 # Create .env file
@@ -56,17 +56,34 @@ touch .env
 Add the following environment variables to your `.env` file:
 
 ```env
+# Backend Configuration
+PORT=3000
+
+# PostgreSQL Database URL (Neon DB or any PostgreSQL provider)
+SHADOW_DB_URL=postgresql://your-user:your-password@your-host:5432/your-database?sslmode=require
+
+# Hugging Face Access Token for AI features
+HF_ACCESS_TOKEN=your_hugging_face_token
+
+# Optional: Supabase Configuration (for cloud save and authentication)
 VITE_PROJECT_URL=your_supabase_project_url
 VITE_ANON_KEY=your_supabase_anon_key
 ```
 
-**Note:** You can get these values by:
-1. Creating a free account at [supabase.com](https://supabase.com)
-2. Creating a new project
-3. Going to Project Settings → API
-4. Copying the Project URL and anon/public key
+**Required Environment Variables:**
+- **PORT**: Port for the backend server (default: 3000)
+- **SHADOW_DB_URL**: PostgreSQL database connection string
+  - Get a free PostgreSQL database at [Neon](https://neon.tech) or [Supabase](https://supabase.com)
+- **HF_ACCESS_TOKEN**: Hugging Face API token for AI features
+  - Get your token from [Hugging Face Settings](https://huggingface.co/settings/tokens)
 
-**Local Mode:** If you don't want to set up Supabase, you can still use the app in local mode (without authentication). The app will work with local file exports/imports.
+**Optional (for cloud features):**
+- **VITE_PROJECT_URL** & **VITE_ANON_KEY**: Supabase credentials for authentication and cloud save
+  - Create a free account at [supabase.com](https://supabase.com)
+  - Go to Project Settings → API
+  - Copy the Project URL and anon/public key
+
+**Local Mode:** The app works without Supabase using local file exports/imports. However, you'll need the PostgreSQL database and Hugging Face token for core functionality.
 
 ### 4. Run the Development Server
 

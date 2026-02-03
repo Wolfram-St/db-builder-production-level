@@ -15,24 +15,44 @@ cd db-builder-production-level
 # 2. Install dependencies
 npm install
 
-# 3. Start the dev server
+# 3. Set up environment variables
+cp .env.example .env
+
+# 4. Configure your .env file with:
+# - PORT (default: 3000)
+# - SHADOW_DB_URL (PostgreSQL database - get free at neon.tech)
+# - HF_ACCESS_TOKEN (Hugging Face token for AI - get at huggingface.co/settings/tokens)
+# - Optional: VITE_PROJECT_URL and VITE_ANON_KEY (Supabase for cloud features)
+
+# 5. Start the dev server
 npm run dev
 ```
 
-That's it! Open http://localhost:5173 in your browser.
+Open http://localhost:5173 in your browser.
 
-## Optional: Supabase Setup (for cloud features)
+## Environment Setup
+
+### Required Variables
+
+1. **Database**: Get a free PostgreSQL database
+   - [Neon.tech](https://neon.tech) (recommended)
+   - [Supabase](https://supabase.com)
+   - Any PostgreSQL provider
+
+2. **AI Token**: Get Hugging Face access token
+   - Go to [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
+   - Create a new token
+   - Copy to `HF_ACCESS_TOKEN` in `.env`
+
+### Optional: Cloud Save Features
 
 If you want authentication and cloud save:
 
 ```bash
-# 1. Copy environment template
-cp .env.example .env
-
-# 2. Get free Supabase account at https://supabase.com
-# 3. Create a new project
-# 4. Copy Project URL and anon key from Settings → API
-# 5. Paste them into your .env file
+# Get free Supabase account at https://supabase.com
+# Create a new project
+# Copy Project URL and anon key from Settings → API
+# Add VITE_PROJECT_URL and VITE_ANON_KEY to your .env file
 ```
 
 ## What You Can Do
