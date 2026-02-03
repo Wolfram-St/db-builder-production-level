@@ -2,7 +2,6 @@ import { useRef, useState, useEffect } from "react";
 import { useParams } from "react-router-dom"; 
 import "../index.css";
 import { Toaster, toast } from "sonner";
-import { supabaseClient } from "../lib/supabaseClient"; // Added for auth check
 
 // Icons
 import {
@@ -17,7 +16,6 @@ import {
   Share2,
   Sparkles,
   Wand2,
-  Cloud,
   Loader2
 } from "lucide-react";
 
@@ -35,7 +33,6 @@ import AssistantButton from "./assistant/AssistantButton";
 import { useDBStore } from "../store/dbStore";
 import { useAssistantStore } from "../store/assistantStore";
 import { saveProject as saveLocal, importProject } from "../lib/projectIO";
-import { saveProjectToCloud, loadProjectFromCloud } from "../lib/cloudIO";
 import { getLayoutedElements } from '../utils/layout';
 import { ProjectCompiler } from "../lib/compiler";
 import { SaveStatus } from "./SavedStatusBar";
@@ -67,90 +64,19 @@ function WorkStation() {
   const [generateOpen, setGenerateOpen] = useState(false);
   const mainRef = useRef<HTMLDivElement | null>(null);
 
-  // --- CLOUD & SECURITY STATE ---
+  // --- SIMPLIFIED STATE (No cloud/auth) ---
   const [projectName, setProjectName] = useState("Untitled Project");
   const [isSaving, setIsSaving] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Default to true
-  const [isValidProject, setIsValidProject] = useState(false); // Security check
   
-  // Hook for auto-saving
-  useProjectSave(isValidProject ? (projectId || '') : ''); 
+  // Hook for auto-saving (now local only)
+  useProjectSave(projectId || ''); 
 
   /* -------------------------------------------------------
-      1. SECURITY & CLOUD LOAD EFFECT
+      1. INITIALIZATION (No cloud loading)
      -------------------------------------------------------- */
-/* -------------------------------------------------------
-    1. SECURITY & CLOUD LOAD EFFECT
-   -------------------------------------------------------- */
 useEffect(() => {
-  // 1. Mount Flag: Prevents state updates if user leaves page mid-load
-  let isMounted = true; 
-
-  const initWorkstation = async () => {
-    // If no ID is present, we are in "Local/Demo Mode" -> Valid by default
-    if (!projectId) {
-      if (isMounted) {
-        setIsValidProject(true);
-        setIsLoading(false);
-      }
-      return;
-    }
-
-    try {
-      // A. Verify Ownership
-      const { data: { user } } = await supabaseClient.auth.getUser();
-      
-      if (!user) {
-         if (isMounted) {
-             setIsValidProject(false);
-             setIsLoading(false);
-         }
-         return;
-      }
-
-      // Check if project exists and belongs to user
-      const { data: projectCheck, error: checkError } = await supabaseClient
-          .from('projects')
-          .select('id, name')
-          .eq('id', projectId)
-          .eq('user_id', user.id)
-          .single(); // Returns specific error if 0 or >1 rows found
-
-      if (checkError || !projectCheck) {
-          console.error("Access denied or project not found:", checkError);
-          if (isMounted) {
-             setIsValidProject(false);
-             // Note: Loading state is handled in 'finally'
-          }
-          return;
-      }
-
-      // B. If valid, Update UI
-      if (isMounted) {
-          setIsValidProject(true);
-          setProjectName(projectCheck.name); // Set name from DB immediately
-      }
-      
-      // C. Load the heavy JSON content
-      const loadedName = await loadProjectFromCloud(projectId);
-      
-      if (isMounted && loadedName) {
-           toast.success(`Loaded "${loadedName}"`);
-      }
-      
-    } catch (err) {
-      console.error("Workstation Init Error:", err);
-      toast.error("Failed to load project.");
-      if (isMounted) setIsValidProject(false);
-    } finally {
-      if (isMounted) setIsLoading(false);
-    }
-  };
-
-  initWorkstation();
-
-  // Cleanup function: invalidates the flag when component unmounts
-  return () => { isMounted = false; };
+  // Always valid in local mode
+  console.log("Workstation initialized in local mode");
 }, [projectId]);
 
 useEffect(() => {
@@ -179,26 +105,12 @@ useEffect(() => {
   }, []);
 
   /* -------------------------------------------------------
-      2. SAVE HANDLER (Cloud vs Local)
+      2. SAVE HANDLER (Local Only)
      -------------------------------------------------------- */
   const handleSave = async () => {
-    if (projectId && isValidProject) {
-      // CLOUD SAVE
-      setIsSaving(true);
-      try {
-        await saveProjectToCloud(projectId, projectName);
-        toast.success("Saved to Cloud!");
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to save to cloud.");
-      } finally {
-        setIsSaving(false);
-      }
-    } else {
-      // LOCAL SAVE
-      saveLocal();
-      toast.success("Project downloaded (Local Mode)");
-    }
+    // LOCAL SAVE only
+    saveLocal();
+    toast.success("Project downloaded");
   };
 
   /* -------------------------------------------------------
@@ -403,24 +315,7 @@ useEffect(() => {
     await handleSafeImport(file);
   };
 
-  // --- RENDER LOADING SCREEN ---
-  if (isLoading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#09090b] text-white">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-10 w-10 animate-spin text-violet-500" />
-          <p className="text-zinc-400">Loading your masterpiece...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // --- RENDER 404 IF INVALID ---
-  if (!isValidProject) {
-      return <NotFound />;
-  }
-
-  // --- RENDER WORKSTATION ---
+  // --- RENDER WORKSTATION (No loading/validation needed) ---
   return (
     <div className="w-full h-screen overflow-hidden bg-[#09090b] text-zinc-100 font-sans selection:bg-violet-500/30 relative flex flex-col bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]">
 
@@ -439,7 +334,7 @@ useEffect(() => {
         <Canvas />
       </main>
 
-      {/* Top Left: Menu (UPDATED WITH CLOUD LOGIC) */}
+      {/* Top Left: Menu */}
       <div className="absolute top-4 left-4 z-50 flex items-center gap-3 pointer-events-none">
         <div className="flex items-center gap-2 px-4 py-2 bg-zinc-900/80 backdrop-blur-md border border-white/10 rounded-xl shadow-xl select-none pointer-events-auto">
           <div className="h-6 w-6 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-md flex items-center justify-center shadow-lg shadow-violet-500/20">
@@ -453,8 +348,8 @@ useEffect(() => {
         <div className="flex items-center gap-1 p-1 bg-zinc-900/80 backdrop-blur-md border border-white/10 rounded-xl shadow-xl pointer-events-auto">
           <ControlButton 
             onClick={handleSave} 
-            icon={isSaving ? <Loader2 className="animate-spin" size={16}/> : (projectId ? <Cloud size={16}/> : <Save size={16}/>)} 
-            tooltip={projectId ? "Save to Cloud" : "Download File"} 
+            icon={<Save size={16}/>} 
+            tooltip="Download File" 
           />
           <label className="cursor-pointer">
             <input type="file" accept=".dbb,.json" className="hidden" onChange={(e) => {

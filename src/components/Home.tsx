@@ -22,7 +22,7 @@ export function Home() {
                     <p className="hero-subtitle">Build databases faster.</p>
                     
                     <div className="button-wrapper">
-                        <Link to='/login'>
+                        <Link to='/workstation'>
                         <GlassButton>Start now!</GlassButton>
                         </Link>
                     </div>
