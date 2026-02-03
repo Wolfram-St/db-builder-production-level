@@ -22,7 +22,6 @@ cp .env.example .env
 # - PORT (default: 3000)
 # - SHADOW_DB_URL (PostgreSQL database - get free at neon.tech)
 # - HF_ACCESS_TOKEN (Hugging Face token for AI - get at huggingface.co/settings/tokens)
-# - Optional: VITE_PROJECT_URL and VITE_ANON_KEY (Supabase for cloud features)
 
 # 5. Start the dev server
 npm run dev
@@ -43,17 +42,6 @@ Open http://localhost:5173 in your browser.
    - Go to [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
    - Create a new token
    - Copy to `HF_ACCESS_TOKEN` in `.env`
-
-### Optional: Cloud Save Features
-
-If you want authentication and cloud save:
-
-```bash
-# Get free Supabase account at https://supabase.com
-# Create a new project
-# Copy Project URL and anon key from Settings → API
-# Add VITE_PROJECT_URL and VITE_ANON_KEY to your .env file
-```
 
 ## What You Can Do
 

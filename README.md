@@ -11,7 +11,7 @@ A modern, visual database schema designer with AI-powered assistance. Build and 
 - 🤖 AI-powered chat assistant (Ctrl/Cmd + K)
 - 📊 Table and relationship management
 - 🔗 Automatic foreign key generation
-- 💾 Cloud save and local export
+- 💾 Local file export/import
 - 🎯 SQL generation
 - 📸 Schema screenshot export
 - ⚡ Auto-layout and tidy-up tools
@@ -64,10 +64,6 @@ SHADOW_DB_URL=postgresql://your-user:your-password@your-host:5432/your-database?
 
 # Hugging Face Access Token for AI features
 HF_ACCESS_TOKEN=your_hugging_face_token
-
-# Optional: Supabase Configuration (for cloud save and authentication)
-VITE_PROJECT_URL=your_supabase_project_url
-VITE_ANON_KEY=your_supabase_anon_key
 ```
 
 **Required Environment Variables:**
@@ -76,14 +72,6 @@ VITE_ANON_KEY=your_supabase_anon_key
   - Get a free PostgreSQL database at [Neon](https://neon.tech) or [Supabase](https://supabase.com)
 - **HF_ACCESS_TOKEN**: Hugging Face API token for AI features
   - Get your token from [Hugging Face Settings](https://huggingface.co/settings/tokens)
-
-**Optional (for cloud features):**
-- **VITE_PROJECT_URL** & **VITE_ANON_KEY**: Supabase credentials for authentication and cloud save
-  - Create a free account at [supabase.com](https://supabase.com)
-  - Go to Project Settings → API
-  - Copy the Project URL and anon/public key
-
-**Local Mode:** The app works without Supabase using local file exports/imports. However, you'll need the PostgreSQL database and Hugging Face token for core functionality.
 
 ### 4. Run the Development Server
 

@@ -35,13 +35,6 @@ Follow this checklist to ensure you have everything set up correctly.
 - [ ] `HF_ACCESS_TOKEN` set (Hugging Face token)
   - Get token at [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
 
-### Optional: Cloud Features
-- [ ] Supabase project created (if using cloud save/auth)
-- [ ] `VITE_PROJECT_URL` set
-- [ ] `VITE_ANON_KEY` set
-
-**Note:** The app requires the database and HF token for core functionality. Supabase is optional for cloud features.
-
 ## Running the Application
 - [ ] Development server starts
   ```bash
@@ -86,12 +79,6 @@ npm install
 - Verify `HF_ACCESS_TOKEN` is set (Hugging Face token)
 - Get free database at [neon.tech](https://neon.tech)
 - Get HF token at [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
-
-### ❌ Supabase errors on startup
-**Solution:** Optional cloud features not configured
-- Supabase is optional for cloud save/authentication
-- Check that `.env` file has `VITE_PROJECT_URL` and `VITE_ANON_KEY`
-- Or continue without cloud features (local mode works)
 
 ## Success! 🎉
 
