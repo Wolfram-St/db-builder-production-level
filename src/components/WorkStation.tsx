@@ -16,7 +16,8 @@ import {
   Share2,
   Sparkles,
   Wand2,
-  Loader2
+  Loader2,
+  Bot
 } from "lucide-react";
 
 // Components
@@ -28,10 +29,12 @@ import GenerateModal from "./GenerateModel";
 import { NotFound } from "./NotFound"; // Import your 404 component
 import AssistantPanel from "./assistant/AssistantPanel";
 import AssistantButton from "./assistant/AssistantButton";
+import ShadowWorkspace from "./ShadowWorkspace";
 
 // Store & Libs
 import { useDBStore } from "../store/dbStore";
 import { useAssistantStore } from "../store/assistantStore";
+import { useAIChatStore } from "../store/aiChatStore";
 import { saveProject as saveLocal, importProject } from "../lib/projectIO";
 import { getLayoutedElements } from '../utils/layout';
 import { ProjectCompiler } from "../lib/compiler";
