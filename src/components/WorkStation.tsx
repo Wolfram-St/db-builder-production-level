@@ -477,8 +477,7 @@ useEffect(() => {
             <DropdownMenuSeparator className="bg-white/10" />
             <DropdownMenuItem 
               onClick={handleSignOut}
-              className="text-red-400 hover:text-red-300 cursor-pointer"
-              variant="destructive"
+              className="text-red-400 hover:text-red-300 focus:text-red-300 cursor-pointer"
             >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Sign out</span>

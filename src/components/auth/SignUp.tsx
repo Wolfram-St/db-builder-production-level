@@ -291,14 +291,7 @@ export function SignUp() {
                   className="w-4 h-4 mt-0.5 rounded border-white/10 bg-white/5 text-violet-600 focus:ring-violet-500/50"
                 />
                 <span className="text-sm text-zinc-400">
-                  I agree to the{' '}
-                  <a href="#" className="text-violet-400 hover:text-violet-300">
-                    Terms and Conditions
-                  </a>{' '}
-                  and{' '}
-                  <a href="#" className="text-violet-400 hover:text-violet-300">
-                    Privacy Policy
-                  </a>
+                  I agree to the Terms and Conditions and Privacy Policy
                 </span>
               </label>
               {errors.terms && (

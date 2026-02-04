@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // Get Supabase credentials from environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -7,8 +7,11 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 // Check if credentials are provided
 const hasCredentials = supabaseUrl && supabaseAnonKey;
 
+// Type for stub client to match Supabase client interface
+type StubSupabaseClient = Pick<SupabaseClient, 'auth' | 'from'>;
+
 // Create real Supabase client if credentials are available, otherwise use stub
-export const supabaseClient = hasCredentials
+export const supabaseClient: SupabaseClient | StubSupabaseClient = hasCredentials
   ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: true,
@@ -65,7 +68,7 @@ export const supabaseClient = hasCredentials
           eq: async () => ({ error: new Error('Cloud storage disabled') }),
         }),
       }),
-    } as any;
+    } as StubSupabaseClient;
 
 // Export a flag to check if Supabase is configured
 export const isSupabaseConfigured = hasCredentials;

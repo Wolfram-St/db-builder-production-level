@@ -12,7 +12,6 @@ export function Login() {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
@@ -163,15 +162,9 @@ export function Login() {
 
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded border-white/10 bg-white/5 text-violet-600 focus:ring-violet-500/50"
-                />
-                <span className="text-sm text-zinc-400">Remember me</span>
-              </label>
+              <div className="text-sm text-zinc-500">
+                {/* Remember me functionality to be implemented with session options */}
+              </div>
               
               <Link
                 to="/forgot-password"

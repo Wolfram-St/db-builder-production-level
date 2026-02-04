@@ -46,14 +46,17 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ isLoading: false });
       }
 
-      // Listen for auth changes
-      supabaseClient.auth.onAuthStateChange((_event: string, session: Session | null) => {
+      // Listen for auth changes - subscription is managed by Supabase
+      const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((_event: string, session: Session | null) => {
         set({
           user: session?.user || null,
           session,
           isAuthenticated: !!session,
         });
       });
+      
+      // Note: Cleanup is not needed here as Zustand store persists for app lifetime
+      // and Supabase manages the subscription lifecycle
     } catch (error) {
       console.error('Auth initialization error:', error);
       set({ isLoading: false });
