@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import './css/home.css';
 import GlassButton from '../components/ui/GlassButton.jsx';
 import { Link, useNavigate } from 'react-router-dom';

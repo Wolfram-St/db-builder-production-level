@@ -16,9 +16,7 @@ import {
   Share2,
   Sparkles,
   Wand2,
-  Loader2,
   Bot,
-  User,
   LogOut,
   Settings,
   FolderKanban
@@ -30,9 +28,9 @@ import MiniMap from "./Minimap";
 import SQLDrawer from "./SQLDrawer";
 import SnipOverlay from "./SnipOverlay";
 import GenerateModal from "./GenerateModel";
-import { NotFound } from "./NotFound"; // Import your 404 component
 import AssistantPanel from "./assistant/AssistantPanel";
 import AssistantButton from "./assistant/AssistantButton";
+import ShadowWorkspace from "./ShadowWorkspace";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -82,14 +80,11 @@ function WorkStation() {
   // --- AUTH STATE ---
   const { user, signOut } = useAuthStore();
 
-  // --- LOCAL STATE ---
+  // --- SIMPLIFIED STATE (No cloud/auth) ---
+  const [projectName] = useState("Untitled Project");
   const [snipOpen, setSnipOpen] = useState(false);
   const [generateOpen, setGenerateOpen] = useState(false);
   const mainRef = useRef<HTMLDivElement | null>(null);
-
-  // --- SIMPLIFIED STATE (No cloud/auth) ---
-  const [projectName, setProjectName] = useState("Untitled Project");
-  const [isSaving, setIsSaving] = useState(false);
   
   // Hook for auto-saving (now local only)
   useProjectSave(projectId || '');

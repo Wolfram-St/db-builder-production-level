@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { supabaseClient } from '../lib/supabaseClient';
-import { User, AuthError, Session } from '@supabase/supabase-js';
+import type { User, AuthError, Session } from '@supabase/supabase-js';
 
 interface AuthState {
   user: User | null;
@@ -19,7 +19,7 @@ interface AuthState {
   setError: (error: string | null) => void;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   session: null,
   isAuthenticated: false,
@@ -47,7 +47,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       // Listen for auth changes
-      supabaseClient.auth.onAuthStateChange((_event, session) => {
+      supabaseClient.auth.onAuthStateChange((_event: string, session: Session | null) => {
         set({
           user: session?.user || null,
           session,
@@ -164,7 +164,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data, error } = await supabaseClient.auth.signInWithOAuth({
+      const { error } = await supabaseClient.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/workstation`,
