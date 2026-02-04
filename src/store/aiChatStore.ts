@@ -1,6 +1,6 @@
 // src/store/aiChatStore.ts
 import { create } from "zustand";
-import { DBTable, Relation } from "./dbStore";
+import type { DBTable, Relation } from "./dbStore";
 
 export interface ChatMessage {
   id: string;
