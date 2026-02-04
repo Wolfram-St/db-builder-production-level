@@ -5,19 +5,20 @@ import {
   Send,
   Paperclip,
   Image as ImageIcon,
-  Loader2,
   Bot,
   User,
   Trash2,
   Copy,
   Check,
   Split,
-  GitCompare,
 } from "lucide-react";
 import { useAIChatStore } from "../store/aiChatStore";
 import { useDBStore } from "../store/dbStore";
-import { AIService } from "../lib/aiService";
+import { AIService, AIAction } from "../lib/aiService";
 import { toast } from "sonner";
+import { getLayoutedElements } from "../../utils/layout";
+import { importProject } from "../../lib/projectIO";
+import { ProjectCompiler } from "../../lib/compiler";
 
 export default function AIChatSidebar() {
   const [inputMessage, setInputMessage] = useState("");
@@ -128,7 +129,7 @@ export default function AIChatSidebar() {
 
       // Execute any actions returned by AI
       if (response.actions && response.actions.length > 0) {
-        executeAIActions(response.actions);
+        await executeAIActions(response.actions);
       }
 
       // Add AI response
@@ -136,46 +137,230 @@ export default function AIChatSidebar() {
         role: "assistant",
         content: response.message,
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("AI Chat Error:", error);
       addMessage({
         role: "assistant",
         content: "I apologize, but I encountered an error processing your request. Please try again.",
       });
-      toast.error(error.message || "Failed to communicate with AI");
+      const errorMessage = error instanceof Error ? error.message : "Failed to communicate with AI";
+      toast.error(errorMessage);
     } finally {
       setIsTyping(false);
     }
   };
 
-  const executeAIActions = (actions: any[]) => {
-    actions.forEach((action) => {
-      switch (action.type) {
-        case "create_table":
-          dbStore.addTable();
-          if (action.data?.name) {
+  const executeAIActions = async (actions: AIAction[]) => {
+    for (const action of actions) {
+      try {
+        switch (action.type) {
+          case "create_table": {
+            // Create table with optional columns
+            dbStore.addTable();
             const tables = dbStore.tables;
             const lastTable = tables[tables.length - 1];
+            
             if (lastTable) {
-              dbStore.renameTable(lastTable.id, action.data.name);
+              // Rename if name provided
+              if (action.data?.name) {
+                dbStore.renameTable(lastTable.id, action.data.name as string);
+              }
+              
+              // Add columns if provided
+              if (action.data?.columns && Array.isArray(action.data.columns)) {
+                const columns = action.data.columns as Array<{
+                  name: string;
+                  type: string;
+                  isPrimary?: boolean;
+                  isUnique?: boolean;
+                  isNullable?: boolean;
+                }>;
+                
+                columns.forEach((col) => {
+                  dbStore.addColumn(lastTable.id);
+                  const currentTable = dbStore.tables.find((t) => t.id === lastTable.id);
+                  const lastCol = currentTable?.columns[currentTable.columns.length - 1];
+                  
+                  if (lastCol) {
+                    dbStore.updateColumn(lastTable.id, lastCol.id, "name", col.name);
+                    dbStore.updateColumn(lastTable.id, lastCol.id, "type", col.type);
+                    
+                    if (col.isPrimary) {
+                      dbStore.toggleColumnFlag(lastTable.id, lastCol.id, "isPrimary");
+                    }
+                    if (col.isUnique) {
+                      dbStore.toggleColumnFlag(lastTable.id, lastCol.id, "isUnique");
+                    }
+                    if (col.isNullable !== undefined && !col.isNullable) {
+                      dbStore.toggleColumnFlag(lastTable.id, lastCol.id, "isNullable");
+                    }
+                  }
+                });
+              }
+              
+              // Set position if provided
+              if (action.data?.x !== undefined && action.data?.y !== undefined) {
+                dbStore.updateTablePosition(
+                  lastTable.id,
+                  action.data.x as number,
+                  action.data.y as number
+                );
+              }
             }
+            
+            toast.success(`Table "${action.data?.name || 'new_table'}" created on canvas`);
+            break;
           }
-          toast.success("Table created");
-          break;
-        case "delete_table":
-          if (action.data?.tableId) {
-            dbStore.removeTable(action.data.tableId);
-            toast.success("Table deleted");
+          
+          case "update_table": {
+            const tableId = action.data?.tableId as string;
+            if (tableId) {
+              if (action.data?.name) {
+                dbStore.renameTable(tableId, action.data.name as string);
+              }
+              if (action.data?.x !== undefined && action.data?.y !== undefined) {
+                dbStore.updateTablePosition(
+                  tableId,
+                  action.data.x as number,
+                  action.data.y as number
+                );
+              }
+              toast.success("Table updated on canvas");
+            }
+            break;
           }
-          break;
-        case "layout":
-          // Trigger auto-layout
-          toast.info("Applying layout...");
-          break;
-        default:
-          console.log("Unknown action:", action.type);
+          
+          case "delete_table": {
+            const tableId = action.data?.tableId as string;
+            if (tableId) {
+              dbStore.removeTable(tableId);
+              toast.success("Table removed from canvas");
+            } else if (action.data?.tableName) {
+              // Find table by name
+              const table = dbStore.tables.find(
+                (t) => t.name === action.data?.tableName
+              );
+              if (table) {
+                dbStore.removeTable(table.id);
+                toast.success(`Table "${action.data.tableName}" removed from canvas`);
+              }
+            }
+            break;
+          }
+          
+          case "create_relation": {
+            const { fromTableId, fromColumnId, toTableId, toColumnId } = action.data as {
+              fromTableId?: string;
+              fromColumnId?: string;
+              toTableId?: string;
+              toColumnId?: string;
+            };
+            
+            if (fromTableId && fromColumnId && toTableId && toColumnId) {
+              dbStore.startRelation(fromTableId, fromColumnId);
+              dbStore.commitRelation(toTableId, toColumnId);
+              toast.success("Relationship created on canvas");
+            }
+            break;
+          }
+          
+          case "update_relation": {
+            const relationId = action.data?.relationId as string;
+            const cardinality = action.data?.cardinality as "one-to-one" | "one-to-many" | "many-to-many";
+            
+            if (relationId && cardinality) {
+              dbStore.updateRelationCardinality(relationId, cardinality);
+              toast.success("Relationship updated");
+            }
+            break;
+          }
+          
+          case "delete_relation": {
+            const relationId = action.data?.relationId as string;
+            if (relationId) {
+              dbStore.deleteRelation(relationId);
+              toast.success("Relationship removed from canvas");
+            }
+            break;
+          }
+          
+          case "layout": {
+            // Apply auto-layout to organize tables
+            const { nodes: layoutedNodes } = await getLayoutedElements(
+              dbStore.tables,
+              dbStore.relations
+            );
+            layoutedNodes.forEach((node: { id: string; position: { x: number; y: number } }) => {
+              dbStore.updateTablePosition(node.id, node.position.x, node.position.y);
+            });
+            toast.success("Tables organized on canvas");
+            break;
+          }
+          
+          case "import_schema": {
+            // Import a complete schema (tables + relations)
+            if (action.data?.schema) {
+              const schema = action.data.schema as { tables?: unknown[]; relations?: unknown[] };
+              
+              // Use the compiler to validate and fix the schema
+              const result = ProjectCompiler.compile(schema);
+              
+              if (result.patchedData.tables && result.patchedData.tables.length > 0) {
+                // Merge with existing data
+                const existingTableIds = new Set(dbStore.tables.map((t) => t.id));
+                const newUniqueTables = result.patchedData.tables.filter(
+                  (t: { id: string }) => !existingTableIds.has(t.id)
+                );
+                
+                const existingRelIds = new Set(dbStore.relations.map((r) => r.id));
+                const newUniqueRelations = (result.patchedData.relations || []).filter(
+                  (r: { id: string }) => !existingRelIds.has(r.id)
+                );
+                
+                // Import via file mechanism
+                const mergedProject = {
+                  viewport: dbStore.viewport,
+                  tables: [...dbStore.tables, ...newUniqueTables],
+                  relations: [...dbStore.relations, ...newUniqueRelations],
+                };
+                
+                const file = new File(
+                  [JSON.stringify(mergedProject)],
+                  "ai-generated-schema.json",
+                  { type: "application/json" }
+                );
+                
+                await importProject(file);
+                
+                // Apply layout if needed
+                if (result.requiresLayout && newUniqueTables.length > 0) {
+                  const { nodes: layoutedNodes } = await getLayoutedElements(
+                    dbStore.tables,
+                    dbStore.relations
+                  );
+                  layoutedNodes.forEach((node: { id: string; position: { x: number; y: number } }) => {
+                    dbStore.updateTablePosition(node.id, node.position.x, node.position.y);
+                  });
+                }
+                
+                toast.success(`${newUniqueTables.length} tables imported to canvas`);
+              } else {
+                toast.error("Invalid schema data");
+              }
+            }
+            break;
+          }
+          
+          default:
+            console.log("Unknown action:", action.type);
+            toast.info(`Action "${action.type}" not yet implemented`);
+        }
+      } catch (error) {
+        console.error(`Error executing action ${action.type}:`, error);
+        const errorMsg = error instanceof Error ? error.message : "Unknown error";
+        toast.error(`Failed to execute ${action.type}: ${errorMsg}`);
       }
-    });
+    }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {

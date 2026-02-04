@@ -14,15 +14,15 @@ export interface AIResponse {
 }
 
 export interface AIAction {
-  type: "create_table" | "update_table" | "delete_table" | "create_relation" | "update_relation" | "delete_relation" | "layout";
-  data: any;
+  type: "create_table" | "update_table" | "delete_table" | "create_relation" | "update_relation" | "delete_relation" | "layout" | "import_schema";
+  data: Record<string, unknown>;
 }
 
 export const AIService = {
   /**
    * Send a chat message to the AI backend
    */
-  chat: async (messages: AIMessage[], context?: any): Promise<AIResponse> => {
+  chat: async (messages: AIMessage[], context?: Record<string, unknown>): Promise<AIResponse> => {
     try {
       const response = await fetch(`${API_URL}/ai/chat`, {
         method: "POST",
@@ -50,7 +50,7 @@ export const AIService = {
   /**
    * Generate schema from text description
    */
-  generateFromDescription: async (description: string): Promise<any> => {
+  generateFromDescription: async (description: string): Promise<Record<string, unknown>> => {
     try {
       const response = await fetch(`${API_URL}/ai/generate-schema`, {
         method: "POST",
