@@ -113,6 +113,8 @@ interface DBState {
 
   saveStatus: 'idle' | 'unsaved' | 'saving' | 'saved' | 'error';
   setSaveStatus: (status: 'idle' | 'unsaved' | 'saving' | 'saved' | 'error') => void;
+
+  loadState: (state: { tables: DBTable[]; relations: Relation[]; viewport?: Viewport }) => void;
 }
 
 function toSnake(s: string) {
@@ -713,6 +715,15 @@ export const useDBStore = create<DBState>((set, get) => {
 
     setSQLDrawerOpen: (open: boolean) => set({ sqlDrawerOpen: open }),
     sqlDrawerOpen: false,
+
+    loadState: (state) =>
+      set((currentState) => ({
+        tables: deepClone(state.tables),
+        relations: deepClone(state.relations),
+        viewport: state.viewport || currentState.viewport,
+        selected: [],
+        selectedRelationId: null,
+      })),
   };
 });
 
