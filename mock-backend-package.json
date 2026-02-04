@@ -1,0 +1,17 @@
+{
+  "name": "db-builder-mock-ai-backend",
+  "version": "1.0.0",
+  "description": "Mock AI backend server for testing DB Builder AI agent features",
+  "main": "mock-ai-server.js",
+  "scripts": {
+    "start": "node mock-ai-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1"
+  },
+  "keywords": ["mock", "ai", "backend", "database", "db-builder"],
+  "author": "",
+  "license": "MIT"
+}
