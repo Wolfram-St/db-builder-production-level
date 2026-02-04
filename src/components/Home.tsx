@@ -1,18 +1,9 @@
-import Spline from '@splinetool/react-spline';
-import './css/home.css';
 import { useRef } from 'react';
-import GlassButton from '../components/ui/GlassButton.jsx'; // Ensure path is correct
+import './css/home.css';
+import GlassButton from '../components/ui/GlassButton.jsx';
 import { Link } from 'react-router-dom';
 
 export function Home() {
-    const splineRef = useRef();
-
-    function onLoad(spline) {
-        splineRef.current = spline;
-        // Optional: Adjust zoom based on screen width if needed
-        spline.setZoom(0.6); 
-    }
-
     return (
         <div className="page-wrapper">
             {/* LAYER 1: The Content (Text + Button) */}
@@ -22,20 +13,15 @@ export function Home() {
                     <p className="hero-subtitle">Build databases faster.</p>
                     
                     <div className="button-wrapper">
-                        <Link to='/login'>
-                        <GlassButton>Start now!</GlassButton>
+                        <Link to='/workstation'>
+                            <GlassButton>Start now!</GlassButton>
                         </Link>
                     </div>
                 </div>
             </div>
 
-            {/* LAYER 2: The 3D Scene (Background) */}
-            <div className="spline-layer">
-                <Spline 
-                    onLoad={onLoad} 
-                    scene="https://prod.spline.design/uC4DlhEGergzUXq4/scene.splinecode"
-                />
-            </div>
+            {/* LAYER 2: The 3D Scene (Background) - Removed temporarily to fix white screen */}
+            {/* The Spline component can be added back later when needed */}
         </div>
     );
 }

@@ -1,13 +1,12 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useDBStore } from '../store/dbStore';
-import { supabaseClient as supabase } from '../lib/supabaseClient';
 
 const AUTOSAVE_INTERVAL = 10 * 60 * 1000; 
 
 export const useProjectSave = (projectId: string) => {
   const { tables, relations, setSaveStatus } = useDBStore();
   
-  // 1. Refs to hold the LATEST data immediately (Solves the Stale State issue)
+  // Refs to hold the latest data
   const stateRef = useRef({ tables, relations });
   const projectIdRef = useRef(projectId);
   const isDirty = useRef(false);
@@ -19,75 +18,48 @@ export const useProjectSave = (projectId: string) => {
     
     // Mark as dirty if it's not the initial load
     if (tables.length > 0 || relations.length > 0) { 
-       // (You might want a more sophisticated check for 'initial load' here)
        isDirty.current = true;
        setSaveStatus('unsaved');
     }
   }, [tables, relations, projectId, setSaveStatus]);
 
 
-  // 2. The Save Function (Reads from Refs, so it never needs to be recreated)
+  // The Save Function - now saves locally only
   const saveProject = useCallback(async () => {
-  const currentProjectId = projectIdRef.current;
-  const currentData = stateRef.current;
+    const currentProjectId = projectIdRef.current;
+    const currentData = stateRef.current;
 
-  // 🔍 DEBUG LOGS: Tell us exactly what the hook sees
-  console.log("---- SAVE ATTEMPT ----");
-  console.log("Project ID:", currentProjectId);
-  console.log("Tables:", currentData.tables.length);
-  
-  if (!currentProjectId) {
-    console.error("❌ ABORTING: Project ID is missing! Check your URL.");
-    setSaveStatus('error'); // Show red badge so you know it failed
-    return;
-  }
-
-  setSaveStatus('saving');
-  
-  try {
-    console.log("💾 Sending data to Supabase...");
+    console.log("---- SAVE ATTEMPT (Local Mode) ----");
+    console.log("Tables:", currentData.tables.length);
     
-    const { error } = await supabase
-      .from('projects')
-      .update({ 
-        diagram_data: currentData, 
-        updated_at: new Date().toISOString() 
-      })
-      .eq('id', currentProjectId);
-
-    if (error) throw error;
-
+    // In local mode, we just mark as saved since changes are in memory
+    // User can manually export using the download button
     setSaveStatus('saved');
     isDirty.current = false;
-    console.log("✅ Save Success");
+    console.log("✅ Changes tracked (use Export to save to file)");
     
-  } catch (error) {
-    console.error("❌ Supabase Error:", error);
-    setSaveStatus('error');
-  }
-}, [setSaveStatus]);
+  }, [setSaveStatus]);
 
-  // 3. Global Keyboard Listener (Attached ONCE, never removed)
+  // Global Keyboard Listener for Ctrl+S
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Check for CTRL+S (Windows/Linux) or CMD+S (Mac)
       if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
-        e.preventDefault(); // Stop browser 'Save Page'
-        console.log("⌨️ Ctrl+S Detected");
+        e.preventDefault();
+        console.log("⌨️ Ctrl+S Detected (Local Mode)");
         saveProject();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [saveProject]); // This dependency is now stable
+  }, [saveProject]);
 
 
-  // 4. Auto-Save Interval
+  // Auto-Save Interval (just marks as saved in local mode)
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (isDirty.current) {
-        console.log("⏰ Auto-Save Timer Triggered");
+        console.log("⏰ Auto-Save Timer (Local Mode)");
         saveProject();
       }
     }, AUTOSAVE_INTERVAL);

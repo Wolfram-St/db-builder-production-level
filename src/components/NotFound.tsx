@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Database, AlertTriangle, Terminal, ArrowLeft, Home } from "lucide-react";
+import { Database, AlertTriangle, Terminal, Home } from "lucide-react";
 
 export function NotFound() {
   return (
@@ -33,7 +33,7 @@ export function NotFound() {
           Query Returned 0 Rows
         </h1>
         <p className="text-zinc-500 text-sm mb-8">
-          The project schema you are trying to fetch has been dropped, moved, or never existed in this timeline.
+          The page you are looking for has been dropped, moved, or never existed.
         </p>
 
         {/* Fake Terminal / Error Log */}
@@ -44,19 +44,19 @@ export function NotFound() {
           </div>
           <div className="space-y-1">
             <p className="text-zinc-500">
-              <span className="text-violet-500">➜</span> GET /api/projects/:id
+              <span className="text-violet-500">➜</span> GET {window.location.pathname}
             </p>
             <p className="text-zinc-400">
-              <span className="text-blue-500">ℹ</span> Verifying ownership keys... <span className="text-green-500">OK</span>
+              <span className="text-blue-500">ℹ</span> Verifying route... <span className="text-green-500">OK</span>
             </p>
             <p className="text-zinc-400">
               <span className="text-blue-500">ℹ</span> Searching indexes...
             </p>
             <p className="text-red-400">
-              <span className="text-red-500">✖</span> Error: EntityNotFoundException
+              <span className="text-red-500">✖</span> Error: RouteNotFoundException
             </p>
             <p className="text-red-400 pl-4">
-              at query_execution (line: 404)
+              at route_execution (line: 404)
             </p>
             <p className="animate-pulse text-zinc-600 mt-2">_</p>
           </div>
@@ -64,18 +64,18 @@ export function NotFound() {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-4 w-full justify-center">
-          <Link to="/dashboard" className="group relative">
+          <Link to="/" className="group relative">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-lg blur opacity-30 group-hover:opacity-75 transition duration-200"></div>
             <button className="relative flex items-center gap-2 px-6 py-3 bg-zinc-900 ring-1 ring-white/10 rounded-lg leading-none text-zinc-300 hover:text-white transition-colors">
-              <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-              <span>Return to Dashboard</span>
+              <Home size={16}/>
+              <span>Return to Home</span>
             </button>
           </Link>
           
-          <Link to="/">
+          <Link to="/workstation">
              <button className="px-6 py-3 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all text-sm font-medium flex items-center gap-2">
-               <Home size={16}/>
-               <span>Home</span>
+               <Database size={16}/>
+               <span>New Project</span>
              </button>
           </Link>
         </div>
