@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { useParams } from "react-router-dom"; 
+import { useParams, useNavigate } from "react-router-dom"; 
 import "../index.css";
 import { Toaster, toast } from "sonner";
 
@@ -16,7 +16,10 @@ import {
   Share2,
   Sparkles,
   Wand2,
-  Loader2
+  Bot,
+  LogOut,
+  Settings,
+  FolderKanban
 } from "lucide-react";
 
 // Components
@@ -25,13 +28,24 @@ import MiniMap from "./Minimap";
 import SQLDrawer from "./SQLDrawer";
 import SnipOverlay from "./SnipOverlay";
 import GenerateModal from "./GenerateModel";
-import { NotFound } from "./NotFound"; // Import your 404 component
 import AssistantPanel from "./assistant/AssistantPanel";
 import AssistantButton from "./assistant/AssistantButton";
+import ShadowWorkspace from "./ShadowWorkspace";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "./ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "./ui/avatar";
 
 // Store & Libs
 import { useDBStore } from "../store/dbStore";
 import { useAssistantStore } from "../store/assistantStore";
+import { useAIChatStore } from "../store/aiChatStore";
+import { useAuthStore } from "../store/authStore";
 import { saveProject as saveLocal, importProject } from "../lib/projectIO";
 import { getLayoutedElements } from '../utils/layout';
 import { ProjectCompiler } from "../lib/compiler";
@@ -40,6 +54,7 @@ import { useProjectSave } from "@/hooks/useProjectSave";
 
 function WorkStation() {
   const { projectId } = useParams(); // Get Project ID from URL
+  const navigate = useNavigate();
   
   // --- STORE STATE ---
   const addTable = useDBStore((s) => s.addTable);
@@ -62,17 +77,39 @@ function WorkStation() {
   // --- AI CHAT STATE ---
   const { isChatOpen, isSplitView, toggleChat } = useAIChatStore();
 
-  // --- LOCAL STATE ---
+  // --- AUTH STATE ---
+  const { user, signOut } = useAuthStore();
+
+  // --- SIMPLIFIED STATE (No cloud/auth) ---
+  const [projectName] = useState("Untitled Project");
   const [snipOpen, setSnipOpen] = useState(false);
   const [generateOpen, setGenerateOpen] = useState(false);
   const mainRef = useRef<HTMLDivElement | null>(null);
-
-  // --- SIMPLIFIED STATE (No cloud/auth) ---
-  const [projectName, setProjectName] = useState("Untitled Project");
-  const [isSaving, setIsSaving] = useState(false);
   
   // Hook for auto-saving (now local only)
-  useProjectSave(projectId || ''); 
+  useProjectSave(projectId || '');
+
+  // Handle sign out
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Signed out successfully");
+    navigate('/login');
+  };
+  
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user) return 'U';
+    if (user.user_metadata?.full_name) {
+      const names = user.user_metadata.full_name.split(' ');
+      return names.length > 1 
+        ? `${names[0][0]}${names[1][0]}`.toUpperCase()
+        : names[0][0].toUpperCase();
+    }
+    if (user.email) {
+      return user.email[0].toUpperCase();
+    }
+    return 'U';
+  }; 
 
   /* -------------------------------------------------------
       1. INITIALIZATION (No cloud loading)
@@ -403,6 +440,51 @@ useEffect(() => {
 
       {/* Top Right: Inspector */}
       <div className={`absolute top-4 z-50 flex flex-col gap-3 items-end pointer-events-none transition-all duration-300 ${isChatOpen ? 'right-[25rem]' : 'right-4'}`}>
+        {/* User Menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="pointer-events-auto flex items-center gap-2 px-3 py-2 bg-zinc-900/80 backdrop-blur-md border border-white/10 hover:border-violet-500/50 rounded-xl shadow-xl transition-all">
+              <Avatar className="h-7 w-7">
+                <AvatarFallback className="bg-gradient-to-br from-violet-600 to-indigo-600 text-white text-xs font-medium">
+                  {getUserInitials()}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-sm text-white font-medium hidden md:block">
+                {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
+              </span>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56 bg-zinc-900/95 backdrop-blur-xl border-white/10">
+            <DropdownMenuLabel className="text-zinc-400">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium text-white">
+                  {user?.user_metadata?.full_name || 'User'}
+                </p>
+                <p className="text-xs text-zinc-400 truncate">
+                  {user?.email}
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-white/10" />
+            <DropdownMenuItem className="text-zinc-300 hover:text-white cursor-pointer">
+              <FolderKanban className="mr-2 h-4 w-4" />
+              <span>My Projects</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="text-zinc-300 hover:text-white cursor-pointer">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-white/10" />
+            <DropdownMenuItem 
+              onClick={handleSignOut}
+              className="text-red-400 hover:text-red-300 focus:text-red-300 cursor-pointer"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Sign out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         {/* AI Chat Toggle Button */}
         <button
           onClick={toggleChat}
